@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Dice Rolls</title>
+	<link rel="stylesheet" href="base.css" />
+	<style>
+		.row {
+			display: flex;
+			margin-bottom: 15px;
+		}
+		.row input {
+			flex-grow: 1;
+			flex-shrink: 0;
+			margin-right: 10px;
+		}
+		.row select {
+			flex-grow: 2;
+			flex-shrink: 0;
+		}
+		#roll {
+			background-image: linear-gradient( rgba( 255, 255, 255, 0.1 ), transparent );
+			display: block;
+			margin: 25px auto 0;
+			outline: none;
+			padding: 10px;
+			width: 160px;
+		}
+		#roll:hover {
+			border-color: #CE9053;
+		}
+		#result {
+			display: block;
+			margin-top: 25px;
+			min-height: 100px;
+			padding: 10px;
+			resize: vertical;
+			width: 100%;
+		}
+		#time {
+			color: rgba( 255, 255, 255, 0.5 );
+			display: block;
+			margin-top: 5px;
+		}
+	</style>
+	<script src="pcg-random.js"></script>
+	<script>
+		let rollTheDice = ( num, type ) => {
+			let value = 0;
+
+			for( let i = 0; i < num; i++ ) {
+				value += 1 + rnd.integer( type );
+			}
+
+			return value;
+		};
+
+		window.addEventListener( 'load', () => {
+			window.rnd = new PcgRandom(Date.now());
+
+			let num1 = document.getElementById( 'num-1' );
+			let type1 = document.getElementById( 'type-1' );
+
+			let num2 = document.getElementById( 'num-2' );
+			let type2 = document.getElementById( 'type-2' );
+
+			let roll = document.getElementById( 'roll' );
+			let result = document.getElementById( 'result' );
+			let time = document.getElementById( 'time' );
+
+			let calculate = () => {
+				let value1 = rollTheDice( num1.value, type1.value );
+				result.value = `${num1.value}D${type1.value} = ${value1}`;
+
+				if( num2.value > 0 ) {
+					let value2 = rollTheDice( num2.value, type2.value );
+					result.value += `\n${num2.value}D${type2.value} = ${value2}`;
+
+					result.value += '\n=====================\n';
+					result.value += value1 + value2;
+				}
+
+				let date = new Date();
+				time.textContent = 'Last roll: ' + date.toLocaleTimeString( 'de-DE' );
+			};
+
+			roll.addEventListener( 'click', calculate );
+		} );
+	</script>
+</head>
+<body>
+
+<div class="content">
+	<h1>Dice Rolls</h1>
+
+	<div class="row row-1">
+		<input type="number" id="num-1" min="0" max="1000" value="5" />
+
+		<select id="type-1">
+			<option value="2">D2</option>
+			<option value="3">D3</option>
+			<option value="4">D4</option>
+			<option value="6">D6</option>
+			<option value="8">D8</option>
+			<option value="10">D10</option>
+			<option value="12">D12</option>
+			<option value="20" selected>D20</option>
+			<option value="100">D100</option>
+		</select>
+	</div>
+
+	<div class="row row-2">
+		<input type="number" id="num-2" min="0" max="1000" value="0" />
+
+		<select id="type-2">
+			<option value="2">D2</option>
+			<option value="3">D3</option>
+			<option value="4">D4</option>
+			<option value="6" selected>D6</option>
+			<option value="8">D8</option>
+			<option value="10">D10</option>
+			<option value="12">D12</option>
+			<option value="20">D20</option>
+			<option value="100">D100</option>
+		</select>
+	</div>
+
+	<button id="roll">Roll the Dice</button>
+
+	<textarea id="result" readonly></textarea>
+	<span id="time">&nbsp;</span>
+</div>
+
+</body>
+</html>
