@@ -15,9 +15,15 @@
 			flex-shrink: 0;
 			margin-right: 10px;
 		}
+		.row input[type="checkbox"] {
+			flex-grow: 0;
+		}
 		.row select {
 			flex-grow: 2;
 			flex-shrink: 0;
+		}
+		label {
+			cursor: pointer;
 		}
 		#roll {
 			background-image: linear-gradient( rgba( 255, 255, 255, 0.1 ), transparent );
@@ -48,16 +54,19 @@
 	<script>
 		let rollTheDice = ( num, type ) => {
 			let value = 0;
+			let throws = [];
 
 			for( let i = 0; i < num; i++ ) {
-				value += 1 + rnd.integer( type );
+				let int = 1 + rnd.integer( type );
+				throws.push( int );
+				value += int;
 			}
 
-			return value;
+			return { throws, value };
 		};
 
 		window.addEventListener( 'load', () => {
-			window.rnd = new PcgRandom(Date.now());
+			window.rnd = new PcgRandom( Date.now() );
 
 			let num1 = document.getElementById( 'num-1' );
 			let type1 = document.getElementById( 'type-1' );
@@ -65,20 +74,46 @@
 			let num2 = document.getElementById( 'num-2' );
 			let type2 = document.getElementById( 'type-2' );
 
+			let inputListThrows = document.getElementById( 'list-throws' );
+
 			let roll = document.getElementById( 'roll' );
 			let result = document.getElementById( 'result' );
 			let time = document.getElementById( 'time' );
 
 			let calculate = () => {
-				let value1 = rollTheDice( num1.value, type1.value );
-				result.value = `${num1.value}D${type1.value} = ${value1}`;
+				result.value = '';
+				let sum = 0;
+				let listThrows = inputListThrows.checked;
+
+				if( num1.value > 0 ) {
+					let data1 = rollTheDice( num1.value, type1.value );
+					result.value = `${num1.value}D${type1.value}`;
+
+					if( listThrows && num1.value > 1 ) {
+						result.value += ` (${data1.throws.join( ' + ' )})`;
+					}
+
+					result.value += ` = ${data1.value}\n`;
+
+					sum += data1.value;
+				}
 
 				if( num2.value > 0 ) {
-					let value2 = rollTheDice( num2.value, type2.value );
-					result.value += `\n${num2.value}D${type2.value} = ${value2}`;
+					let data2 = rollTheDice( num2.value, type2.value );
+					result.value += `${num2.value}D${type2.value}`;
 
-					result.value += '\n=====================\n';
-					result.value += value1 + value2;
+					if( listThrows && num2.value > 1 ) {
+						result.value += ` (${data2.throws.join( ' + ' )})`;
+					}
+
+					result.value += ` = ${data2.value}\n`;
+
+					sum += data2.value;
+				}
+
+				if( num1.value > 0 && num2.value > 0 ) {
+					result.value += '=====================\n';
+					result.value += sum;
 				}
 
 				let date = new Date();
@@ -124,6 +159,11 @@
 			<option value="20">D20</option>
 			<option value="100">D100</option>
 		</select>
+	</div>
+
+	<div class="row options">
+		<input type="checkbox" id="list-throws" value="true" checked />
+		<label for="list-throws">List value of each throw</label>
 	</div>
 
 	<button id="roll">Roll the Dice</button>
